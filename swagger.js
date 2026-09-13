@@ -5,8 +5,8 @@ const doc = {
     title: 'Fitness Tracker API',
     description: 'API for tracking workouts and exercises',
   },
-  host: 'localhost:8080',
-  schemes: ['http'],
+  host: 'cse341-fitness-tracker-api.onrender.com',
+  schemes: ['https'],
   basePath: '/',
 };
 
