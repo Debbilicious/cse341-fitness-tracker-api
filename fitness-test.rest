@@ -1,0 +1,37 @@
+### Get all exercises
+GET http://localhost:8080/exercises
+
+###
+
+### Create a new exercise
+POST http://localhost:8080/exercises
+Content-Type: application/json
+
+{
+  "name": "Bench Press",
+  "category": "Chest",
+  "equipment": "Barbell",
+  "description": "A compound exercise targeting the chest, shoulders, and triceps."
+}
+
+###
+
+### Get all workouts
+GET http://localhost:8080/workouts
+
+###
+
+### Create a new workout
+POST http://localhost:8080/workouts
+Content-Type: application/json
+
+{
+  "date": "2026-09-15",
+  "exerciseName": "Bench Press",
+  "sets": 4,
+  "reps": 10,
+  "weight": 135,
+  "duration": 20,
+  "caloriesBurned": 150,
+  "notes": "Felt strong today"
+}
