@@ -1,6 +1,6 @@
+const { ObjectId } = require('mongodb');
 const connectDB = require('../data/db');
 
-// GET all workouts
 exports.getAll = async (req, res) => {
   try {
     const db = await connectDB();
@@ -12,7 +12,29 @@ exports.getAll = async (req, res) => {
   }
 };
 
-// POST a new workout
+exports.getOne = async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid workout id format' });
+    }
+
+    const db = await connectDB();
+    const workout = await db
+      .collection('workouts')
+      .findOne({ _id: new ObjectId(id) });
+
+    if (!workout) {
+      return res.status(404).json({ error: 'Workout not found' });
+    }
+
+    res.status(200).json(workout);
+  } catch (err) {
+    console.error('Error fetching workout:', err);
+    res.status(500).json({ error: 'Failed to fetch workout' });
+  }
+};
+
 exports.create = async (req, res) => {
   try {
     const {
@@ -26,21 +48,6 @@ exports.create = async (req, res) => {
       notes,
     } = req.body;
 
-    if (
-      !date ||
-      !exerciseName ||
-      sets === undefined ||
-      reps === undefined ||
-      weight === undefined ||
-      duration === undefined ||
-      caloriesBurned === undefined
-    ) {
-      return res.status(400).json({
-        error:
-          'Required fields: date, exerciseName, sets, reps, weight, duration, caloriesBurned',
-      });
-    }
-
     const db = await connectDB();
     const newWorkout = {
       date,
@@ -53,10 +60,77 @@ exports.create = async (req, res) => {
       notes: notes || '',
     };
     const result = await db.collection('workouts').insertOne(newWorkout);
-
     res.status(201).json({ id: result.insertedId });
   } catch (err) {
     console.error('Error creating workout:', err);
     res.status(500).json({ error: 'Failed to create workout' });
+  }
+};
+
+exports.update = async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid workout id format' });
+    }
+
+    const {
+      date,
+      exerciseName,
+      sets,
+      reps,
+      weight,
+      duration,
+      caloriesBurned,
+      notes,
+    } = req.body;
+
+    const updatedWorkout = {
+      date,
+      exerciseName,
+      sets,
+      reps,
+      weight,
+      duration,
+      caloriesBurned,
+      notes: notes || '',
+    };
+
+    const db = await connectDB();
+    const result = await db
+      .collection('workouts')
+      .updateOne({ _id: new ObjectId(id) }, { $set: updatedWorkout });
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Workout not found' });
+    }
+
+    res.status(204).send();
+  } catch (err) {
+    console.error('Error updating workout:', err);
+    res.status(500).json({ error: 'Failed to update workout' });
+  }
+};
+
+exports.remove = async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid workout id format' });
+    }
+
+    const db = await connectDB();
+    const result = await db
+      .collection('workouts')
+      .deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Workout not found' });
+    }
+
+    res.status(200).json({ message: 'Workout deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting workout:', err);
+    res.status(500).json({ error: 'Failed to delete workout' });
   }
 };
